@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="tr">
+
+<head>
+  <!-- Meta -->
+  <meta charset="UTF-8">
+  <meta name="viewport"
+    content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <!-- Title -->
+  <title>FlaskChatApp</title>
+  <!-- Poppins Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
+    rel="stylesheet">
+  <!-- RemixIcon -->
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@2.2.0/fonts/remixicon.css" rel="stylesheet">
+  <!-- TailwindCss -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: {
+              50: "#cfdafd",
+              100: "#9eb5fb",
+              200: "#6e8ff9",
+              300: "#3d6af7",
+              400: "#0D45F5",
+              500: "#0a37c4",
+              600: "#082993",
+              700: "#051c62",
+              800: "#030e31",
+              900: "#010718"
+            }
+          },
+          fontFamily: {
+            sans: ["Poppins", "sans-serif"],
+          },
+        }
+      }
+    }
+  </script>
+  <!-- JQuery -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"
+    integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ=="
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+</head>
+
+<body class="flex flex-col h-screen w-screen text-gray-700 bg-primary-50 py-14">
+
+
+
+  <div class="bg-white w-2/3 flex-1 mx-auto rounded-3xl shadow-md">
+    <div class="flex h-full p-10">
+      <div class="flex flex-col w-full">
+        <div id="characters" class="flex flex-col flex-1 justify-start -my-2">
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script type="text/javascript" charset="utf-8">
+    $("document").ready(() => {
+
+      let characters = [{
+        id: 1,
+        image: "https://cdn4.iconfinder.com/data/icons/avatars-xmas-giveaway/128/trump_president_avatar_male-256.png",
+        name: "Donald Trump"
+      }, {
+        id: 2,
+        image: "https://cdn4.iconfinder.com/data/icons/avatars-xmas-giveaway/128/chaplin_comedy_actor_man-256.png",
+        name: "Charlie Chaplin"
+      }, {
+        id: 3,
+        image: "https://cdn4.iconfinder.com/data/icons/avatars-xmas-giveaway/128/scientist_einstein_avatar_professor-256.png",
+        name: "Albert Einstein"
+      }, {
+        id: 4,
+        image: "https://cdn4.iconfinder.com/data/icons/avatars-xmas-giveaway/128/batman_hero_avatar_comics-256.png",
+        name: "Batman"
+      }, {
+        id: 5,
+        image: "https://cdn4.iconfinder.com/data/icons/avatars-xmas-giveaway/128/marilyn_monroe_artist_avatar-256.png",
+        name: "Marilyn Monroe"
+      }, {
+        id: 6,
+        image: "https://cdn4.iconfinder.com/data/icons/avatars-xmas-giveaway/128/zombie_avatar_monster_dead-256.png",
+        name: "Zombie"
+      }]
+
+      generateCharacters(characters);
+      listenCharacters(characters);
+
+      function listenCharacters() {
+        $(".character").click(function () {
+          let id = window.btoa($(this).attr("id"))
+          let nickname = window.btoa($(this).attr("name"))
+          let image = window.btoa($(this).attr("image"))
+          window.location.href = "/?id=" + id + "&nickname=" + nickname + "&image=" + image
+        })
+      }
+
+      function generateCharacters(characters) {
+        let str = ""
+        for (var i = 0; i < characters.length; i++) {
+          str +=
+            '<div class="character flex items-center my-2 p-2 border border-gray-100 rounded-xl hover:border-primary-400 cursor-pointer" id="' +
+            characters[i].id + '" name="' +
+            characters[i].name +
+            '" image="' + characters[i].image +
+            '"><img class="w-14 h-14 rounded-full border-4 border-primary-100" src="' +
+            characters[i].image + '" /> <span class="ml-4 font-medium">' + characters[i].name + '</span> </div>';
+        }
+        $('#characters').html(str);
+      };
+
+
+    })
+  </script>
+
+</body>
+
+</html>

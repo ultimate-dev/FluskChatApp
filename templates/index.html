@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="tr">
+
+<head>
+  <!-- Meta -->
+  <meta charset="UTF-8">
+  <meta name="viewport"
+    content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <!-- Title -->
+  <title>FlaskChatApp</title>
+  <!-- Poppins Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
+    rel="stylesheet">
+  <!-- RemixIcon -->
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@2.2.0/fonts/remixicon.css" rel="stylesheet">
+  <!-- TailwindCss -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: {
+              50: "#cfdafd",
+              100: "#9eb5fb",
+              200: "#6e8ff9",
+              300: "#3d6af7",
+              400: "#0D45F5",
+              500: "#0a37c4",
+              600: "#082993",
+              700: "#051c62",
+              800: "#030e31",
+              900: "#010718"
+            }
+          },
+          fontFamily: {
+            sans: ["Poppins", "sans-serif"],
+          },
+        }
+      }
+    }
+  </script>
+  <!-- JQuery -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"
+    integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ=="
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <!-- SocketIO -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"
+    integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA=="
+    crossorigin="anonymous"></script>
+  <!-- CyriptoJS -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"
+    integrity="sha512-E8QSvWZ0eCLGk4km3hxSsNmGWbLtSCSUcewDQPQWZF6pEU8GlT8a5fF32wOl1i8ftdMhssTrF/OhyGWwonTcXA=="
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+</head>
+
+<body class="flex flex-col h-screen w-screen text-gray-700 bg-primary-50 py-14">
+
+  <div class="flex justify-end items-center bg-primary-400 w-2/3 mx-auto rounded-3xl shadow-md mb-5 px-10 py-2">
+    <span id="me_nickname" class="mr-3 text-white"></span>
+    <img id="me_image" class="w-12 h-12 rounded-full border-2 border-white" src="" />
+  </div>
+
+  <div class="bg-white w-2/3 flex-1 mx-auto rounded-3xl shadow-md">
+    <div class="flex h-full p-10">
+      <div id="users" class="flex flex-col w-60 mr-5 -my-2 overflow-y-auto">
+
+      </div>
+      <div class="flex flex-col flex-1 pl-5 border-l border-gray-100 overflow-y-auto">
+        <div class="flex-1" id="messages">
+
+
+        </div>
+        <div class="border-t border-gray-100 flex">
+          <input id="message" class="flex-1 h-12 outline-none" placeholder="Message" />
+
+          <button id="send" class="h-10 w-10 m-2 bg-primary-400 rounded-lg flex items-center justify-center">
+            <i class="ri-send-plane-2-fill text-white"></i>
+          </button>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="text/javascript" charset="utf-8">
+    var socket = io();
+
+    $.urlParam = function (name) {
+      var results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(window.location.href);
+      try {
+        return window.atob(results[1]) || 0;
+      } catch (error) {
+        return 0;
+      }
+
+    }
+
+
+    $("document").ready(() => {
+      var id = $.urlParam('id')
+      var nickname = $.urlParam('nickname')
+      var image = $.urlParam('image')
+
+
+      if (!id || !nickname || !image) {
+        window.location.href = "/login"
+      } else {
+
+        $("#me_nickname").text(nickname);
+        $("#me_image").attr("src", image);
+
+        // Disconnect
+        socket.on('connect', function () {
+          socket.emit("set_user", {
+            id,
+            nickname,
+            image
+          });
+        });
+        // Disconnect
+        socket.on('disconnect', function () {
+          socket.emit('remove_user', {
+            id,
+            nickname,
+            image
+          })
+        });
+
+        // Sending Message
+        $("#send").click(function () {
+          var message = $("#message").val()
+
+          socket.emit('send_message', {
+            user: {
+              id,
+              nickname,
+              image
+            },
+            message: message,
+
+          })
+          $("#message").val("")
+        })
+
+        // Listen Messages
+        socket.on('messages', function (data) {
+          console.log(data)
+          generateMessages(data.messages)
+        });
+
+        function generateMessages(messages) {
+          let str = ""
+          for (var i = 0; i < messages.length; i++) {
+            if (messages[i].user.id !== id)
+              str +=
+              '<div class="flex justify-start my-2"> <img class="w-5 h-5 inline-block rounded-full mr-2" src="' +
+              messages[i].user.image +
+              '" /> <div class="inline-block text-gray-600 bg-gray-100 py-2 px-4 rounded-lg rounded-tl-none"> <span class="text-sm">' +
+              messages[i].message + '</span> </div> </div>'
+            else
+              str +=
+              '<div class="flex justify-end my-2"> <div class="inline-block text-white bg-primary-400 py-2 px-4 rounded-lg rounded-tr-none"> <span class="text-sm">' +
+              messages[i].message + '</span></div> </div>'
+          }
+          $('#messages').html(str);
+        };
+
+
+        // Listen Users
+        socket.on('users', function (data) {
+          generateUsers(data.users)
+          generateMessages(data.messages)
+        });
+
+        function generateUsers(users) {
+          let str = ""
+          for (var i = 0; i < users.length; i++) {
+            if (users[i].id !== id)
+              str +=
+              '<div class="flex items-center py-2"> <img class="w-14 h-14 rounded-full border-4 border-primary-100" src="' +
+              users[i].image + '" /> <span class="ml-4 font-medium">' + users[i].nickname + '</span> </div>'
+          }
+          $('#users').html(str);
+        };
+      }
+    })
+  </script>
+
+</body>
+
+</html>
