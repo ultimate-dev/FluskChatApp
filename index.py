@@ -52,4 +52,4 @@ def send_message(message):
 
 
 if __name__ == "__main__":
-    socketio.run(app, host="192.168.43.185", port=8080, debug=True)
+    socketio.run(app, host="localhost", port=8080, debug=True)
